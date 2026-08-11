@@ -491,6 +491,7 @@ h1, h2, h3, .statement, .voice, .fork__k, .not, .payoff,
   .fork__side { text-align: left; max-width: 23ch; margin-right: auto; }
   .fork__side:last-child { text-align: right; margin-right: 0; margin-left: auto; }
   /* vozes: quatro falas alternando esquerda/direita (quatro caminhos), fonte e linha menores */
+  .beat[data-beat="5"] .voices { gap: clamp(52px, 9vh, 80px); }   /* ~3 enters entre as falas no mobile */
   .voice { font-size: clamp(1rem, .82rem + 2vw, 1.5rem); max-width: 19ch; }
   .voice:nth-child(odd) { justify-self: start; text-align: left; border-left: 2px solid var(--gold); border-right: none; padding-left: 13px; padding-right: 0; }
   .voice:nth-child(even) { justify-self: end; text-align: right; border-right: 2px solid var(--gold); border-left: none; padding-right: 13px; padding-left: 0; }
