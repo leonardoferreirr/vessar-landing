@@ -10,6 +10,8 @@
   var progressBar = document.getElementById('progressBar');
   var scrollHint = document.getElementById('scrollHint');
   var soundBtn = document.getElementById('soundBtn');
+  var hexLabels = document.getElementById('hexLabels');
+  var hexlabs = hexLabels ? Array.prototype.slice.call(hexLabels.querySelectorAll('.hexlab')) : [];
 
   var vh = window.innerHeight;
   var docH = 1;
@@ -48,6 +50,23 @@
     state.beatP = activeP;
     state.theme = theme;
     if (window.VessarStage) window.VessarStage.update(state);
+
+    // rótulos das 6 dimensões acompanham os vértices do hexágono (beat 6)
+    if (hexLabels) {
+      if (state.beat === 6 && window.VessarStage && window.VessarStage.hexVertices) {
+        hexLabels.classList.add('show');
+        var vs = window.VessarStage.hexVertices();
+        var hcx = window.innerWidth / 2, hcy = vh * 0.60;
+        for (var li = 0; li < hexlabs.length; li++) {
+          var vtx = vs[li]; if (!vtx) continue;
+          var dx = vtx.x - hcx, dy = vtx.y - hcy, len = Math.sqrt(dx * dx + dy * dy) || 1;
+          hexlabs[li].style.left = (vtx.x + dx / len * 30) + 'px';
+          hexlabs[li].style.top = (vtx.y + dy / len * 24) + 'px';
+        }
+      } else if (hexLabels.classList.contains('show')) {
+        hexLabels.classList.remove('show');
+      }
+    }
 
     ticking = false;
   }

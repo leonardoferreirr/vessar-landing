@@ -30,7 +30,6 @@
       <span class="wordmark__mark">V</span>
       <span class="wordmark__name">VESSAR</span>
     </a>
-    <span class="cvm-badge"><span class="cvm-badge__dot"></span>Autorizada pela CVM · Ato nº 25.571</span>
     <button class="sound" id="soundBtn" aria-label="Ligar som ambiente" aria-pressed="false">
       <span class="sound__wave"><span></span><span></span><span></span><span></span></span>
     </button>
@@ -40,6 +39,16 @@
   <div class="scroll-hint" id="scrollHint">
     <span>ROLAR</span>
     <span class="scroll-hint__mouse"><i></i></span>
+  </div>
+
+  <!-- Rótulos das 6 dimensões: posicionados nos vértices do hexágono de partículas -->
+  <div class="hex-labels" id="hexLabels" aria-hidden="true">
+    <span class="hexlab"><b>Objetivos</b><i>o papel de cada parcela</i></span>
+    <span class="hexlab"><b>Liquidez</b><i>quando o recurso é preciso</i></span>
+    <span class="hexlab"><b>Horizonte</b><i>o prazo de cada decisão</i></span>
+    <span class="hexlab"><b>Risco</b><i>o que faz sentido assumir</i></span>
+    <span class="hexlab"><b>Concentração</b><i>o que reage igual</i></span>
+    <span class="hexlab"><b>Custos</b><i>o peso no conjunto</i></span>
   </div>
 
   <main>
@@ -57,15 +66,6 @@
       <div class="beat__inner"><div class="beat__box">
         <h2 class="statement statement--sm rise">Aconselhar sem vender deixou de ser <span class="hl">exceção</span>.</h2>
         <p class="lead rise">O mercado está migrando para modelos mais alinhados ao cliente: menos empurrão de produto, mais critério, mais transparência sobre o que cada escolha custa.</p>
-        <div class="chart rise" aria-hidden="true">
-          <svg viewBox="0 0 640 220" role="img">
-            <line x1="0" y1="200" x2="640" y2="200" stroke="rgba(245,245,242,.14)" stroke-width="1"/>
-            <path id="chartHist" d="M0,190 C120,182 210,168 320,150" fill="none" stroke="#f5f5f2" stroke-width="2.5" stroke-linecap="round"/>
-            <path id="chartProj" d="M320,150 C430,128 520,86 640,34" fill="none" stroke="#e2be75" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="2 9"/>
-            <circle cx="320" cy="150" r="5" fill="#e2be75"/>
-          </svg>
-          <p class="chart__cap">Consultores de valores mobiliários autorizados pela CVM · fonte a confirmar</p>
-        </div>
       </div></div>
     </section>
 
@@ -105,26 +105,11 @@
       </div></div>
     </section>
 
-    <!-- Beat 06 · A virada + hexágono das 6 dimensões (INVERTE) -->
-    <section class="beat beat--tall" data-beat="6" data-theme="light">
-      <div class="beat__inner"><div class="beat__box">
-        <h2 class="statement statement--sm rise">Agora você não precisa mais <span class="hl">escolher</span>.</h2>
-        <p class="lead rise">Visão do conjunto de um lado, dinheiro nas suas contas do outro: os dois viraram um. A Vessar transforma um patrimônio espalhado num <span class="hl">sistema</span> que você entende.</p>
-        <div class="hexwrap rise" aria-hidden="true">
-          <svg viewBox="0 0 560 480" id="hexSvg" role="img">
-            <polygon points="280,60 480,175 480,405 280,420 80,405 80,175" class="hex-dim" stroke="#c99a4b" stroke-width="1.4" opacity=".5"/>
-            <g text-anchor="middle">
-              <text class="hex-label" x="280" y="46">Objetivos</text>
-              <text class="hex-sub" x="280" y="30" opacity=".7">o papel de cada parcela</text>
-              <text class="hex-label" x="500" y="170">Liquidez</text>
-              <text class="hex-label" x="500" y="415">Horizonte</text>
-              <text class="hex-label" x="280" y="452">Risco</text>
-              <text class="hex-sub" x="280" y="468" opacity=".7">o que faz sentido assumir</text>
-              <text class="hex-label" x="60" y="415">Concentração</text>
-              <text class="hex-label" x="60" y="170">Custos</text>
-            </g>
-          </svg>
-        </div>
+    <!-- Beat 06 · A virada + hexágono das 6 dimensões (INVERTE, hexágono feito de partículas) -->
+    <section class="beat beat--tall beat--hex" data-beat="6" data-theme="light">
+      <div class="beat__inner beat__inner--top"><div class="beat__box">
+        <h2 class="statement statement--xs rise">Agora você não precisa mais <span class="hl">escolher</span>.</h2>
+        <p class="lead lead--tight rise">Seu patrimônio espalhado vira um <span class="hl">sistema</span> que você entende: seis dimensões, lidas juntas.</p>
       </div></div>
     </section>
 
@@ -211,6 +196,40 @@
     </section>
 
   </main>
+
+  <!-- Rodapé -->
+  <footer class="footer">
+    <div class="footer__row">
+      <a class="wordmark footer__mark" href="#">
+        <span class="wordmark__mark">V</span>
+        <span class="wordmark__name">VESSAR</span>
+      </a>
+      <p class="footer__cvm">Consultoria de valores mobiliários, autorizada pela CVM<br>Ato Declaratório nº 25.571</p>
+    </div>
+    <div class="footer__grid">
+      <div>
+        <span class="footer__k">Empresa</span>
+        Vessar Consultoria de Investimentos<br>
+        CNPJ 66.853.886/0001-24<br>
+        Savassi, Belo Horizonte, MG
+      </div>
+      <div>
+        <span class="footer__k">Contato</span>
+        <a href="mailto:contato@vessar.com.br">contato@vessar.com.br</a><br>
+        (31) 3157-3952
+      </div>
+      <div>
+        <span class="footer__k">Documentos</span>
+        Formulário de referência<br>
+        Código de ética<br>
+        Política de investimentos
+      </div>
+    </div>
+    <div class="footer__base">
+      <span>© Vessar · 2026</span>
+      <span>Seu dinheiro nunca sai das suas contas.</span>
+    </div>
+  </footer>
 
   <!-- SEO / acessibilidade: copy canônica pra crawler -->
   <div class="seo-only">
