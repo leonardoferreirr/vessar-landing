@@ -1,0 +1,431 @@
+/* ==========================================================================
+   VESSAR — Consultoria de Valores Mobiliários
+   Filme de scroll. Palco escuro contínuo, um só acento (ouro champanhe),
+   frases curtas, uma inversão de fundo no clímax. DNA Revert, pele Vessar.
+   ========================================================================== */
+
+/* ---------- Fontes (self-hosted, gate de perf) ---------- */
+@font-face {
+  font-family: 'Cinzel';
+  src: url('../fonts/Cinzel-var.woff2') format('woff2');
+  font-weight: 500 700;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../fonts/Montserrat-var.woff2') format('woff2');
+  font-weight: 300 600;
+  font-display: swap;
+  font-style: normal;
+}
+
+/* ---------- Tokens ---------- */
+:root {
+  /* fundo escuro (ancorado no #080b10 real da marca) */
+  --ink: #080b10;
+  --ink-card: #0c1017;
+  --ink-line: rgba(226, 190, 117, .16);
+  --vignette: #04060a;
+
+  /* claro (seção invertida) */
+  --cream: #f5f5f2;
+  --cream-bg: #f6f3ec;
+  --cream-card: #ffffff;
+
+  /* texto */
+  --fg: #f5f5f2;
+  --fg-dim: rgba(245, 245, 242, .60);
+  --fg-dimmer: rgba(245, 245, 242, .34);
+  --on-cream: #0b0f16;
+  --on-cream-dim: rgba(11, 15, 22, .60);
+
+  /* acento único: ouro champanhe real da Vessar */
+  --gold: #e2be75;
+  --gold-soft: #eac993;
+  --gold-deep: #c99a4b;
+  --on-gold: #17110a;
+  --role: #8a6e2e;
+
+  --error: #c8564c;
+
+  /* fontes */
+  --display: 'Cinzel', 'Times New Roman', serif;
+  --body: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* ritmo */
+  --gutter: clamp(22px, 5vw, 64px);
+  --read: 54ch;
+  --ease: cubic-bezier(.22, .8, .32, 1);
+}
+
+/* ---------- Reset / base ---------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--body);
+  font-weight: 300;
+  background: var(--ink);
+  color: var(--fg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+img, svg, canvas { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+::selection { background: var(--gold); color: var(--on-gold); }
+
+h1, h2, h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: .005em;
+  text-wrap: balance;
+}
+
+/* palavra em destaque: o único ouro do quadro */
+.hl { color: var(--gold); }
+.strike { position: relative; color: var(--fg-dimmer); }
+.strike::after {
+  content: '';
+  position: absolute; left: -2%; right: -2%; top: 52%; height: 2px;
+  background: var(--fg-dimmer);
+  transform: scaleX(var(--strike, 1));
+  transform-origin: left center;
+}
+
+/* ==========================================================================
+   PALCO fixo (canvas atrás de tudo) + inversão de fundo
+   ========================================================================== */
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+#stageCanvas { width: 100%; height: 100%; }
+
+/* a cor do palco é dirigida por classe no <body> (o JS troca conforme o beat) */
+body {
+  transition: background-color .7s var(--ease);
+}
+body.is-light { background: var(--cream-bg); color: var(--on-cream); }
+
+/* ==========================================================================
+   CHROME persistente
+   ========================================================================== */
+.chrome {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(18px, 2.4vw, 30px) var(--gutter);
+  pointer-events: none;
+}
+.chrome > * { pointer-events: auto; }
+
+.wordmark {
+  display: flex; align-items: center; gap: 12px;
+}
+.wordmark__mark {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--gold);
+  display: grid; place-items: center;
+  font-family: var(--display); font-weight: 600; font-size: 15px;
+  color: var(--gold);
+}
+.wordmark__name {
+  font-family: var(--display); font-weight: 600;
+  font-size: 18px; letter-spacing: .16em; color: var(--fg);
+}
+body.is-light .wordmark__name { color: var(--on-cream); }
+
+.cvm-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; letter-spacing: .04em; color: var(--fg-dim);
+  border: 1px solid var(--ink-line);
+  border-radius: 999px; padding: 8px 16px;
+  background: rgba(8, 11, 16, .4);
+  backdrop-filter: blur(6px);
+}
+.cvm-badge__dot { width: 7px; height: 7px; border-radius: 50%; background: #3fb97a; box-shadow: 0 0 0 4px rgba(63, 185, 122, .18); }
+body.is-light .cvm-badge { color: var(--on-cream-dim); border-color: rgba(11,15,22,.14); background: rgba(255,255,255,.5); }
+
+.sound {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1px solid var(--gold);
+  display: grid; place-items: center;
+  color: var(--gold);
+  transition: background-color .3s, transform .3s;
+}
+.sound:hover { background: rgba(226,190,117,.1); }
+.sound__wave { display: flex; align-items: center; gap: 2px; height: 14px; }
+.sound__wave span { width: 2px; background: currentColor; border-radius: 2px; height: 40%; }
+.sound.is-on .sound__wave span { animation: eq 1s var(--ease) infinite; }
+.sound.is-on .sound__wave span:nth-child(2) { animation-delay: .15s; }
+.sound.is-on .sound__wave span:nth-child(3) { animation-delay: .3s; }
+.sound.is-on .sound__wave span:nth-child(4) { animation-delay: .45s; }
+@keyframes eq { 0%, 100% { height: 30%; } 50% { height: 95%; } }
+
+/* barra de progresso */
+.progress {
+  position: fixed; top: 0; left: 0; z-index: 45;
+  height: 2px; width: 100%;
+  background: transparent;
+}
+.progress__bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold));
+  box-shadow: 0 0 12px rgba(226, 190, 117, .5);
+  transition: width .1s linear;
+}
+
+/* indicador de scroll */
+.scroll-hint {
+  position: fixed; left: 50%; bottom: 26px; z-index: 40;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font-size: 10px; letter-spacing: .32em; color: var(--fg-dim);
+  transition: opacity .5s;
+}
+.scroll-hint__mouse {
+  width: 20px; height: 32px; border: 1px solid var(--fg-dim); border-radius: 12px;
+  display: flex; justify-content: center; padding-top: 6px;
+}
+.scroll-hint__mouse i { width: 3px; height: 6px; border-radius: 3px; background: var(--gold); animation: wheel 1.6s var(--ease) infinite; }
+@keyframes wheel { 0% { opacity: 0; transform: translateY(-3px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(7px); } }
+.scroll-hint.is-hidden { opacity: 0; pointer-events: none; }
+
+/* ==========================================================================
+   BEATS — cada beat pina seu conteúdo por uma fração de scroll
+   ========================================================================== */
+main { position: relative; z-index: 10; }
+
+.beat {
+  position: relative;
+  min-height: 175vh;               /* dá "tempo" de scroll ao beat */
+}
+.beat--short { min-height: 130vh; }
+.beat--tall { min-height: 210vh; }
+
+.beat__inner {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 96px var(--gutter);
+  text-align: center;
+}
+.beat__box {
+  width: min(1080px, 100%);
+  margin-inline: auto;
+}
+
+/* reveal: entra suave quando o beat fica ativo, sai quando passa */
+.beat__inner .rise {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity .8s var(--ease), transform .9s var(--ease);
+}
+.beat.is-active .beat__inner .rise { opacity: 1; transform: none; }
+.beat.is-active .beat__inner .rise:nth-child(2) { transition-delay: .08s; }
+.beat.is-active .beat__inner .rise:nth-child(3) { transition-delay: .16s; }
+.beat.is-active .beat__inner .rise:nth-child(4) { transition-delay: .24s; }
+.beat.is-past .beat__inner { opacity: 0; transition: opacity .5s var(--ease); }
+
+/* tipografia dos statements */
+.statement {
+  font-size: clamp(2.1rem, 1rem + 5.4vw, 5rem);
+  font-weight: 600;
+  line-height: 1.06;
+}
+.statement--sm { font-size: clamp(1.9rem, 1rem + 4vw, 3.6rem); }
+.lead {
+  font-family: var(--body);
+  font-weight: 300;
+  font-size: clamp(1.02rem, .95rem + .5vw, 1.3rem);
+  color: var(--fg-dim);
+  max-width: var(--read);
+  margin: 28px auto 0;
+  line-height: 1.65;
+}
+body.is-light .lead { color: var(--on-cream-dim); }
+
+/* ---------- Beat 1 · Hero ---------- */
+.hero__title { margin-bottom: 4px; }
+
+/* ---------- Beat 2 · Tese de mercado (gráfico) ---------- */
+.chart {
+  margin: 44px auto 0;
+  width: min(640px, 100%);
+}
+.chart svg { width: 100%; height: auto; overflow: visible; }
+.chart__cap { margin-top: 14px; font-size: 12px; letter-spacing: .12em; color: var(--fg-dimmer); text-transform: uppercase; }
+
+/* ---------- Beat 3 · A escolha (duas colunas) ---------- */
+.fork {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: clamp(24px, 6vw, 90px);
+  margin-top: 8px; align-items: start;
+}
+.fork__side { text-align: left; }
+.fork__side:last-child { text-align: right; }
+.fork__k {
+  font-family: var(--display); font-size: 1.05rem; font-weight: 600;
+  color: var(--fg-dim); margin-bottom: 14px;
+}
+.fork__side--gold .fork__k { color: var(--gold); }
+.fork__t { font-size: clamp(1.3rem, .9rem + 1.9vw, 2.2rem); font-weight: 300; font-family: var(--body); line-height: 1.3; }
+.fork__side--gold .fork__t { color: var(--gold); }
+
+/* ---------- Beat 5 · Voz do cliente ---------- */
+.voices { display: grid; gap: clamp(20px, 4vw, 44px); }
+.voice {
+  font-family: var(--display); font-weight: 500;
+  font-size: clamp(1.3rem, .9rem + 1.9vw, 2.3rem);
+  line-height: 1.24; max-width: 20ch;
+  padding-left: 20px; border-left: 2px solid var(--gold);
+  text-align: left;
+}
+.voice:nth-child(odd) { justify-self: start; }
+.voice:nth-child(even) { justify-self: end; text-align: right; border-left: none; border-right: 2px solid var(--gold); padding-left: 0; padding-right: 20px; }
+
+/* ---------- Beat 6 · Hexágono das 6 dimensões ---------- */
+.hexwrap { margin: 40px auto 0; width: min(560px, 100%); }
+.hexwrap svg { width: 100%; height: auto; overflow: visible; }
+.hex-dim { fill: none; }
+.hex-label { font-family: var(--display); font-size: 15px; font-weight: 600; fill: var(--on-cream); }
+.hex-sub { font-family: var(--body); font-size: 10.5px; fill: var(--on-cream-dim); }
+
+/* ---------- Beat 7 · Não é / é ---------- */
+.nots { display: grid; gap: 14px; margin-bottom: 40px; text-align: center; }
+.not {
+  font-family: var(--display); font-weight: 500;
+  font-size: clamp(1.2rem, .9rem + 1.5vw, 2rem);
+  color: var(--fg-dimmer);
+}
+body.is-light .not { color: var(--on-cream-dim); }
+.not span { position: relative; }
+.not span::after {
+  content: ''; position: absolute; left: -1%; right: -1%; top: 54%; height: 2px;
+  background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .5s var(--ease);
+}
+.beat.is-active .not span::after { transform: scaleX(1); }
+.beat.is-active .not:nth-child(2) span::after { transition-delay: .18s; }
+.beat.is-active .not:nth-child(3) span::after { transition-delay: .36s; }
+.payoff { margin-top: 22px; font-family: var(--body); font-weight: 300; font-size: clamp(1.05rem,.95rem + .6vw,1.35rem); color: var(--on-cream-dim); }
+body:not(.is-light) .payoff { color: var(--fg-dim); }
+
+/* ---------- Beat 8 · Rosto humano ---------- */
+.people { display: flex; justify-content: center; gap: 32px; margin-top: 44px; flex-wrap: wrap; }
+.person { width: min(280px, 80vw); text-align: center; }
+.person__photo {
+  width: 128px; height: 128px; border-radius: 50%; margin: 0 auto 18px;
+  background: linear-gradient(160deg, #14181f, #0c1017);
+  border: 1px solid var(--ink-line);
+  display: grid; place-items: center;
+  font-family: var(--display); font-size: 2rem; color: var(--gold);
+}
+body.is-light .person__photo { background: linear-gradient(160deg,#efeae0,#fff); border-color: rgba(11,15,22,.1); }
+.person__name { font-family: var(--display); font-size: 1.3rem; font-weight: 600; }
+.person__role { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--role); margin-top: 6px; }
+.person__bio { font-size: .92rem; color: var(--on-cream-dim); margin-top: 12px; }
+body:not(.is-light) .person__bio { color: var(--fg-dim); }
+.tbc { font-size: 11px; letter-spacing: .1em; color: var(--gold-deep); text-transform: uppercase; margin-top: 10px; opacity: .8; }
+
+/* ---------- Beat 9 · Lastro ---------- */
+.trust {
+  margin: 40px auto 0; width: min(720px, 100%);
+  border: 1px solid var(--ink-line); border-radius: 18px;
+  background: rgba(12, 16, 23, .5); backdrop-filter: blur(8px);
+  padding: clamp(24px, 4vw, 40px); text-align: left;
+}
+.trust__seal { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.trust__data { display: grid; gap: 6px; margin-top: 14px; font-size: 13px; letter-spacing: .04em; color: var(--fg-dim); line-height: 1.7; }
+.trust__vault { margin-top: 22px; font-family: var(--display); font-size: clamp(1.1rem,.9rem + 1vw,1.6rem); font-weight: 600; }
+.trust__note { margin-top: 10px; font-size: .92rem; color: var(--fg-dim); }
+.trust__docs { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--ink-line); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--fg-dimmer); }
+
+/* ---------- Beat 10 · Convite / CTA ---------- */
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 12px;
+  margin-top: 34px;
+  background: var(--gold); color: var(--on-gold);
+  font-family: var(--body); font-weight: 600; font-size: 1.05rem;
+  letter-spacing: .01em;
+  padding: 18px 36px; border-radius: 999px;
+  transition: transform .3s var(--ease), box-shadow .3s, background-color .3s;
+  box-shadow: 0 18px 50px -18px rgba(226, 190, 117, .6);
+}
+.cta-btn:hover { transform: translateY(-3px); background: var(--gold-soft); box-shadow: 0 24px 60px -18px rgba(226, 190, 117, .8); }
+.cta-btn__arrow { transition: transform .3s var(--ease); }
+.cta-btn:hover .cta-btn__arrow { transform: translateX(5px); }
+.cta-alt { margin-top: 22px; font-size: .9rem; color: var(--fg-dim); }
+.cta-alt a { color: var(--gold); }
+.cta-micro { margin-top: 16px; font-size: .84rem; color: var(--fg-dimmer); }
+
+/* ---------- Beat 11 · Formulário ---------- */
+.form-sheet {
+  width: min(520px, 100%); margin: 32px auto 0;
+  background: var(--cream-card); color: var(--on-cream);
+  border-radius: 24px; padding: clamp(28px, 4vw, 44px);
+  text-align: left; box-shadow: 0 40px 90px -30px rgba(0,0,0,.7);
+}
+.form-sheet h2 { font-size: clamp(1.5rem, 1rem + 2vw, 2.2rem); margin-bottom: 6px; }
+.form-sheet p { color: var(--on-cream-dim); font-size: .95rem; margin-bottom: 22px; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--role); margin-bottom: 8px; }
+.field input {
+  width: 100%; padding: 15px 16px; font: inherit; font-size: 1rem;
+  border: 1px solid rgba(11,15,22,.16); border-radius: 12px;
+  background: #fbfaf7; color: var(--on-cream); transition: border-color .25s;
+}
+.field input:focus { outline: none; border-color: var(--gold-deep); }
+.field input.invalid { border-color: var(--error); }
+.form-submit {
+  width: 100%; margin-top: 8px; padding: 16px;
+  background: var(--on-cream); color: var(--cream);
+  font-family: var(--body); font-weight: 600; font-size: 1rem;
+  border-radius: 12px; transition: opacity .25s;
+}
+.form-submit:hover { opacity: .9; }
+.form-lgpd { margin-top: 16px; font-size: .8rem; color: var(--on-cream-dim); line-height: 1.5; }
+.form-alt { margin-top: 14px; font-size: .85rem; }
+.form-alt a { color: var(--gold-deep); font-weight: 500; }
+.form-ok { text-align: center; font-family: var(--display); font-size: 1.6rem; color: var(--gold-deep); padding: 30px 0; }
+
+/* ==========================================================================
+   SEO fallback — copy canônica pra crawler, fora da tela
+   ========================================================================== */
+.seo-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ==========================================================================
+   Responsivo
+   ========================================================================== */
+@media (max-width: 720px) {
+  .beat__inner { padding: 90px 22px; }
+  .fork { grid-template-columns: 1fr; text-align: center; gap: 30px; }
+  .fork__side, .fork__side:last-child { text-align: center; }
+  .voice, .voice:nth-child(even) { justify-self: center; text-align: center; border: none; padding: 0; max-width: 26ch; }
+  .voice { border-left: none; }
+  .cvm-badge { display: none; }
+  .trust { text-align: left; }
+}
+
+/* ==========================================================================
+   Movimento reduzido
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; }
+  .beat__inner .rise { opacity: 1 !important; transform: none !important; transition: none; }
+  body { transition: none; }
+  .scroll-hint__mouse i { animation: none; }
+}
