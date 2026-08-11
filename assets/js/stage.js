@@ -66,9 +66,9 @@
     var u = COLS > 1 ? col / (COLS - 1) : .5, v = ROWS > 1 ? row / (ROWS - 1) : .5, lin = i / (N - 1);
     switch (name) {
       case 'floor': return { x: (u - .5) * 1500, y: 280, z: v * 1700 };
-      case 'curve': { var rise = Math.pow(v, 1.5); return { x: (u - .5) * 1400, y: 240 - rise * 620, z: v * 1600 }; }
-      case 'fork': { var side = u < .5 ? -1 : 1, bend = smooth(.32, 1, v); return { x: (u - .5) * 900 + side * bend * 620, y: 280 - bend * 40, z: v * 1700 }; }
-      case 'funnel': { var k = Math.pow(v, 1.3), ang = u * Math.PI * 2 + v * 2.4, rad = (1 - k) * 640; return { x: Math.cos(ang) * rad, y: 40 + Math.sin(ang) * rad * .5 + k * 120, z: 200 + k * 1500 }; }
+      case 'curve': return { x: (u - .5) * 1400, y: 280 - v * 200, z: v * 1700 };                 // um caminho reto que sobe
+      case 'fork': { var side = u < .5 ? -1 : 1, lu = (u < .5 ? u : u - .5) * 2, div = v * 520; return { x: side * div + (lu - .5) * (480 + v * 340), y: 280 - v * 180, z: v * 1700 }; }  // o caminho se divide em dois, retos
+      case 'funnel': { var kk = v; return { x: (u - .5) * 1400 * (1 - kk * 0.7), y: 280 - kk * 210, z: v * 1700 }; }  // tudo converge reto pro mesmo ponto de fuga
       case 'journey': { var s = lin; return { x: Math.sin(s * Math.PI * 3) * 400, y: (s - .5) * 940, z: 300 + Math.cos(s * Math.PI * 3) * 110 }; }
       case 'hexagon': { var s6 = Math.floor(lin * 6) % 6, f = (lin * 6) % 1, R = 240, a0 = (Math.PI / 3) * s6 - Math.PI / 2, a1 = (Math.PI / 3) * (s6 + 1) - Math.PI / 2, jz = (h1(i) - .5) * 16; return { x: lerp(Math.cos(a0) * R, Math.cos(a1) * R, f), y: lerp(Math.sin(a0) * R, Math.sin(a1) * R, f) + 40, z: 260 + jz }; }
       case 'isonet': return { x: (u - .5) * 1100, y: (v - .5) * 640 + 20, z: 320 };
@@ -87,7 +87,7 @@
   var MODES = { 1: 'cloud', 2: 'curve', 3: 'fork', 4: 'funnel', 5: 'journey', 6: 'hexagon', 7: 'isonet', 8: 'cloud', 9: 'floor', 10: 'cloud', 11: 'cloud' };
   var GRID_WIRE = { floor: 1, curve: 1, fork: 1, funnel: 1, isonet: 1 };
   var SEQ_WIRE = { hexagon: 1, journey: 1 };
-  function cyOf(m) { return H * (m === 'floor' || m === 'fork' ? 0.40 : m === 'hexagon' ? 0.60 : 0.52); }
+  function cyOf(m) { return H * (m === 'floor' || m === 'fork' || m === 'curve' || m === 'funnel' ? 0.40 : m === 'hexagon' ? 0.60 : 0.52); }
   function isCloudMode(beat) { return (MODES[beat] || 'cloud') === 'cloud'; }
 
   function drawGridWire(alpha, gold) {
@@ -116,7 +116,7 @@
 
     var A = st.beat, B = Math.min(11, st.beat + 1);
     var modeA = MODES[A] || 'cloud', modeB = MODES[B] || 'cloud';
-    var morphT = smooth(0.22, 0.92, st.beatP);          // transforma quase o beat todo: nunca "parado"
+    var morphT = smooth(0.55, 1.0, st.beatP);           // estável e legível a maior parte; só transiciona na saída (sem spoiler)
     themeMix = lerp(themeMix, st.theme === 'light' ? 1 : 0, 0.07);
 
     var cx = W / 2, cy = lerp(cyOf(modeA), cyOf(modeB), morphT);
@@ -131,11 +131,11 @@
       var p = pts[i];
       var a = beatShape(A, i), b = shape(modeB, i);
       var tx = lerp(a.x, b.x, morphT), ty = lerp(a.y, b.y, morphT), tz = lerp(a.z, b.z, morphT);
-      var drift = reduced ? 0 : Math.sin(t * 0.6 + p.tw) * (4 + cloudMix * 5);
+      var drift = reduced ? 0 : Math.sin(t * 0.6 + p.tw) * cloudMix * 10;   // deriva só no universo; as malhas ficam retas
       var k = reduced ? 1 : 0.09;
       p.x = lerp(p.x, tx, k); p.y = lerp(p.y, ty + drift, k); p.z = lerp(p.z, tz, k);
       var zz = Math.max(60, p.z + 520), s = FOCAL / zz;
-      var par = desktop ? s * 90 : 0;
+      var par = desktop ? s * 90 * cloudMix : 0;   // ímã de mouse só no universo (hero); não entorta as formas
       p.sx = cx + camX + p.x * s + mx * par * (1 + p.star);
       p.sy = cy + p.y * s + my * par * (1 + p.star);
       p.sc = s;

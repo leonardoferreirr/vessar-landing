@@ -9,7 +9,6 @@
   var body = document.body;
   var progressBar = document.getElementById('progressBar');
   var scrollHint = document.getElementById('scrollHint');
-  var soundBtn = document.getElementById('soundBtn');
   var hexLabels = document.getElementById('hexLabels');
   var hexlabs = hexLabels ? Array.prototype.slice.call(hexLabels.querySelectorAll('.hexlab')) : [];
 
@@ -77,16 +76,6 @@
 
   window.addEventListener('scroll', requestScroll, { passive: true });
   window.addEventListener('resize', function () { measure(); requestScroll(); });
-
-  // som ambiente: toggle. A trilha real entra quando o arquivo for definido.
-  var ambient = null;
-  soundBtn.addEventListener('click', function () {
-    var on = soundBtn.classList.toggle('is-on');
-    soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    soundBtn.setAttribute('aria-label', on ? 'Desligar som ambiente' : 'Ligar som ambiente');
-    // Quando houver trilha: assets/audio/ambient.mp3 (loop, volume baixo).
-    if (ambient) { if (on) ambient.play().catch(function () {}); else ambient.pause(); }
-  });
 
   // formulário: validação leve + estado de sucesso.
   // O envio real (Gmail SMTP / Formspree) pluga aqui depois.
