@@ -27,7 +27,7 @@
   <!-- Chrome -->
   <header class="chrome">
     <a class="wordmark" href="#" aria-label="Vessar, início">
-      <span class="wordmark__mark">V</span>
+      <img class="wordmark__v" src="assets/img/vessar-mark.svg" alt="" width="30" height="26">
       <span class="wordmark__name">VESSAR</span>
     </a>
     <button class="sound" id="soundBtn" aria-label="Ligar som ambiente" aria-pressed="false">
@@ -37,8 +37,8 @@
 
   <!-- Indicador de scroll -->
   <div class="scroll-hint" id="scrollHint">
-    <span>ROLAR</span>
-    <span class="scroll-hint__mouse"><i></i></span>
+    <span>scroll</span>
+    <span class="scroll-hint__line"></span>
   </div>
 
   <!-- Rótulos das 6 dimensões: posicionados nos vértices do hexágono de partículas -->
@@ -62,15 +62,15 @@
     </section>
 
     <!-- Beat 02 · Tese de mercado -->
-    <section class="beat" data-beat="2" data-theme="dark">
+    <section class="beat beat--upper" data-beat="2" data-theme="dark">
       <div class="beat__inner"><div class="beat__box">
         <h2 class="statement statement--sm rise">Aconselhar sem vender deixou de ser <span class="hl">exceção</span>.</h2>
-        <p class="lead rise">O mercado está migrando para modelos mais alinhados ao cliente: menos empurrão de produto, mais critério, mais transparência sobre o que cada escolha custa.</p>
+        <p class="lead lead--mid rise">O mercado está migrando para modelos mais alinhados ao cliente: menos empurrão de produto, mais critério, mais transparência sobre o que cada escolha custa.</p>
       </div></div>
     </section>
 
     <!-- Beat 03 · A escolha -->
-    <section class="beat" data-beat="3" data-theme="dark">
+    <section class="beat beat--upper" data-beat="3" data-theme="dark">
       <div class="beat__inner"><div class="beat__box">
         <div class="fork">
           <div class="fork__side rise">
@@ -128,15 +128,17 @@
 
     <!-- Beat 08 · Rosto humano -->
     <section class="beat" data-beat="8" data-theme="light">
-      <div class="beat__inner"><div class="beat__box">
-        <h2 class="statement statement--sm rise">Quem responde por isso tem <span class="hl">nome</span>.</h2>
-        <div class="people rise">
+      <div class="beat__inner"><div class="beat__box beat__box--split">
+        <div class="split__col rise">
+          <h2 class="statement statement--sm">Quem responde por isso tem <span class="hl">nome</span>.</h2>
+        </div>
+        <div class="split__col rise">
           <div class="person">
             <div class="person__photo">R</div>
             <p class="person__name">Reubem Thales</p>
             <p class="person__role">Diretor Responsável</p>
             <p class="person__bio">Responsável perante a CVM pela atividade de consultoria de valores mobiliários da Vessar.</p>
-            <p class="tbc">Bio, trajetória e certificações a confirmar</p>
+            <p class="tbc">Foto e bio a confirmar</p>
           </div>
         </div>
       </div></div>

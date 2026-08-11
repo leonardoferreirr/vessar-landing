@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="250 290 580 500" role="img" aria-labelledby="title">
+  <title id="title">Símbolo V da Vessar</title>
+  <defs>
+    <linearGradient id="gold" x1="297" y1="310" x2="734" y2="751" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EAC993"/>
+      <stop offset=".58" stop-color="#B88B42"/>
+      <stop offset="1" stop-color="#7D5C28"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#gold)" d="M519.713 770.039L297.282 433.841L500.156 702.649L726.216 348.344H682.012L495.084 625.847L272.641 309.953H372.629L529.132 538.9L682.012 309.953H807.359L519.713 770.039Z"/>
+</svg>

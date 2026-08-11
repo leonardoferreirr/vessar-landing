@@ -138,6 +138,7 @@ body.is-light { background: var(--cream-bg); color: var(--on-cream); }
   font-family: var(--display); font-weight: 600; font-size: 15px;
   color: var(--gold);
 }
+.wordmark__v { height: 30px; width: auto; display: block; }
 .wordmark__name {
   font-family: var(--display); font-weight: 600;
   font-size: 18px; letter-spacing: .16em; color: var(--fg);
@@ -192,12 +193,10 @@ body.is-light .cvm-badge { color: var(--on-cream-dim); border-color: rgba(11,15,
   font-size: 10px; letter-spacing: .32em; color: var(--fg-dim);
   transition: opacity .5s;
 }
-.scroll-hint__mouse {
-  width: 20px; height: 32px; border: 1px solid var(--fg-dim); border-radius: 12px;
-  display: flex; justify-content: center; padding-top: 6px;
-}
-.scroll-hint__mouse i { width: 3px; height: 6px; border-radius: 3px; background: var(--gold); animation: wheel 1.6s var(--ease) infinite; }
-@keyframes wheel { 0% { opacity: 0; transform: translateY(-3px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(7px); } }
+.scroll-hint span { text-transform: lowercase; }
+.scroll-hint__line { width: 1px; height: 46px; background: linear-gradient(var(--fg-dimmer), transparent); position: relative; overflow: hidden; }
+.scroll-hint__line::after { content: ''; position: absolute; inset: 0 auto auto 0; width: 100%; height: 45%; background: linear-gradient(var(--gold), transparent); animation: scrolldrop 1.9s var(--ease) infinite; }
+@keyframes scrolldrop { 0% { transform: translateY(-110%); } 60%, 100% { transform: translateY(240%); } }
 .scroll-hint.is-hidden { opacity: 0; pointer-events: none; }
 
 /* ==========================================================================
@@ -440,6 +439,16 @@ h1, h2, h3, .statement, .voice, .fork__k, .not, .payoff,
 .hexlab b { display: block; font-weight: 600; font-size: clamp(.82rem, .7rem + .45vw, 1.02rem); color: var(--on-cream); letter-spacing: .01em; }
 .hexlab i { display: block; font-style: normal; font-size: 10.5px; color: var(--on-cream-dim); margin-top: 3px; letter-spacing: .01em; }
 
+/* beats 2 e 3 — conteúdo no topo pra liberar a malha/bifurcação embaixo */
+.beat--upper .beat__inner { align-items: start; padding-top: clamp(112px, 15vh, 200px); }
+.beat--upper .lead--mid { margin-top: clamp(120px, 22vh, 260px); }
+
+/* beat 8 — título à esquerda, pessoa à direita (desktop) */
+.beat__box--split { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 6vw, 90px); align-items: center; text-align: left; }
+.beat__box--split .statement { text-align: left; }
+.split__col .person { text-align: left; margin: 0; width: auto; }
+.split__col .person__photo { margin: 0 0 18px; }
+
 /* ==========================================================================
    Rodapé
    ========================================================================== */
@@ -467,6 +476,11 @@ h1, h2, h3, .statement, .voice, .fork__k, .not, .payoff,
   .footer__grid { grid-template-columns: 1fr; gap: 22px; }
   .hexlab i { display: none; }
   .hexlab b { font-size: .8rem; }
+  .beat__box--split { grid-template-columns: 1fr; text-align: center; gap: 30px; }
+  .beat__box--split .statement { text-align: center; }
+  .split__col .person { text-align: center; margin-inline: auto; }
+  .split__col .person__photo { margin: 0 auto 18px; }
+  .beat--upper .lead--mid { margin-top: clamp(56px, 12vh, 130px); }
   .beat__inner { padding: 90px 22px; }
   .fork { grid-template-columns: 1fr; text-align: center; gap: 30px; }
   .fork__side, .fork__side:last-child { text-align: center; }
