@@ -430,7 +430,7 @@ h1, h2, h3, .statement, .voice, .fork__k, .not, .payoff,
 
 /* beat 6 — título no topo, hexágono de partículas ocupa o centro/baixo */
 .beat__inner--top { align-items: start; }
-.beat--hex .beat__inner { padding-top: clamp(88px, 13vh, 160px); }
+.beat--hex .beat__inner { padding-top: clamp(64px, 9vh, 110px); }
 
 /* rótulos das 6 dimensões, posicionados nos vértices do hexágono (JS) */
 .hex-labels { position: fixed; inset: 0; z-index: 15; pointer-events: none; opacity: 0; transition: opacity .6s var(--ease); }

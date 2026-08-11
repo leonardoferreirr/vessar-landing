@@ -55,7 +55,7 @@
       if (state.beat === 6 && window.VessarStage && window.VessarStage.hexVertices) {
         hexLabels.classList.add('show');
         var vs = window.VessarStage.hexVertices();
-        var hcx = window.innerWidth / 2, hcy = vh * 0.60;
+        var hcx = window.innerWidth / 2, hcy = vh * 0.63;
         for (var li = 0; li < hexlabs.length; li++) {
           var vtx = vs[li]; if (!vtx) continue;
           var dx = vtx.x - hcx, dy = vtx.y - hcy, len = Math.sqrt(dx * dx + dy * dy) || 1;

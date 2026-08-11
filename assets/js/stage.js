@@ -67,10 +67,10 @@
     switch (name) {
       case 'floor': return { x: (u - .5) * 1500, y: 280, z: v * 1700 };
       case 'curve': return { x: (u - .5) * 1400, y: 280 - v * 200, z: v * 1700 };                 // um caminho reto que sobe
-      case 'fork': { var side = u < .5 ? -1 : 1, lu = (u < .5 ? u : u - .5) * 2, div = v * 520; return { x: side * div + (lu - .5) * (480 + v * 340), y: 280 - v * 180, z: v * 1700 }; }  // o caminho se divide em dois, retos
-      case 'funnel': { var kk = v; return { x: (u - .5) * 1400 * (1 - kk * 0.7), y: 280 - kk * 210, z: v * 1700 }; }  // tudo converge reto pro mesmo ponto de fuga
+      case 'fork': { var side = u < .5 ? -1 : 1, lu = (u < .5 ? u : u - .5) * 2, base = 100 + v * 240; return { x: side * (base + lu * 430), y: 280 - v * 180, z: v * 1700 }; }  // dois caminhos separados (gap no meio), divergindo
+      case 'funnel': { var k = Math.pow(v, 1.12), ang = u * Math.PI * 2 + v * 3.0, rad = (1 - k) * 560; return { x: Math.cos(ang) * rad, y: Math.sin(ang) * rad * 0.55 + 30, z: 220 + k * 1500 }; }  // vórtice: tudo gira e converge pro mesmo ponto (concentração)
       case 'journey': { var s = lin; return { x: Math.sin(s * Math.PI * 3) * 400, y: (s - .5) * 940, z: 300 + Math.cos(s * Math.PI * 3) * 110 }; }
-      case 'hexagon': { var s6 = Math.floor(lin * 6) % 6, f = (lin * 6) % 1, R = 240, a0 = (Math.PI / 3) * s6 - Math.PI / 2, a1 = (Math.PI / 3) * (s6 + 1) - Math.PI / 2, jz = (h1(i) - .5) * 16; return { x: lerp(Math.cos(a0) * R, Math.cos(a1) * R, f), y: lerp(Math.sin(a0) * R, Math.sin(a1) * R, f) + 40, z: 260 + jz }; }
+      case 'hexagon': { var s6 = Math.floor(lin * 6) % 6, f = (lin * 6) % 1, R = 205, a0 = (Math.PI / 3) * s6 - Math.PI / 2, a1 = (Math.PI / 3) * (s6 + 1) - Math.PI / 2, jz = (h1(i) - .5) * 14; return { x: lerp(Math.cos(a0) * R, Math.cos(a1) * R, f), y: lerp(Math.sin(a0) * R, Math.sin(a1) * R, f) + 30, z: 260 + jz }; }
       case 'isonet': return { x: (u - .5) * 1100, y: (v - .5) * 640 + 20, z: 320 };
       default: return { x: (h1(i) - .5) * 1700, y: (h2(i) - .5) * 1000, z: 120 + h1(i + 7) * 1900 };
     }
@@ -87,16 +87,17 @@
   var MODES = { 1: 'cloud', 2: 'curve', 3: 'fork', 4: 'funnel', 5: 'journey', 6: 'hexagon', 7: 'isonet', 8: 'cloud', 9: 'floor', 10: 'cloud', 11: 'cloud' };
   var GRID_WIRE = { floor: 1, curve: 1, fork: 1, funnel: 1, isonet: 1 };
   var SEQ_WIRE = { hexagon: 1, journey: 1 };
-  function cyOf(m) { return H * (m === 'floor' || m === 'fork' || m === 'curve' || m === 'funnel' ? 0.40 : m === 'hexagon' ? 0.60 : 0.52); }
+  function cyOf(m) { return H * (m === 'floor' || m === 'fork' || m === 'curve' ? 0.40 : m === 'hexagon' ? 0.63 : 0.52); }
   function isCloudMode(beat) { return (MODES[beat] || 'cloud') === 'cloud'; }
 
-  function drawGridWire(alpha, gold) {
+  function drawGridWire(alpha, gold, splitMid) {
     if (alpha < 0.012) return;
+    var mid = Math.floor((COLS - 1) * 0.5);   // na bifurcação, não liga os dois lados no meio
     ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(' + gold + ',' + alpha.toFixed(3) + ')';
     ctx.beginPath();
     for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
       var idx = r * COLS + c, pa = pts[idx];
-      if (c < COLS - 1) { var pr = pts[idx + 1]; ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pr.sx, pr.sy); }
+      if (c < COLS - 1 && !(splitMid && c === mid)) { var pr = pts[idx + 1]; ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pr.sx, pr.sy); }
       if (r < ROWS - 1) { var pd = pts[idx + COLS]; ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pd.sx, pd.sy); }
     }
     ctx.stroke();
@@ -146,7 +147,7 @@
     // cross-fade das linhas: grade e sequencial coexistem durante a transição
     var gridAlpha = ((GRID_WIRE[modeA] ? 1 - morphT : 0) + (GRID_WIRE[modeB] ? morphT : 0)) * wireBase;
     var seqAlpha = ((SEQ_WIRE[modeA] ? 1 - morphT : 0) + (SEQ_WIRE[modeB] ? morphT : 0)) * (wireBase + 0.05);
-    drawGridWire(gridAlpha, gold);
+    drawGridWire(gridAlpha, gold, (modeA === 'fork' || modeB === 'fork') ? 1 : 0);
     drawSeqWire(seqAlpha, gold);
 
     var dotBase = lerp(0.85, 0.76, themeMix);
