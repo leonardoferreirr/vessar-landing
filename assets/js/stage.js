@@ -67,7 +67,7 @@
     switch (name) {
       case 'floor': return { x: (u - .5) * 1500, y: 280, z: v * 1700 };
       case 'curve': return { x: (u - .5) * 1400, y: 280 - v * 200, z: v * 1700 };                 // um caminho reto que sobe
-      case 'fork': { var side = u < .5 ? -1 : 1, lu = (u < .5 ? u : u - .5) * 2, base = 100 + v * 240; return { x: side * (base + lu * 430), y: 280 - v * 180, z: v * 1700 }; }  // dois caminhos separados (gap no meio), divergindo
+      case 'fork': { var gx = u - 0.5, sg = gx < 0 ? -1 : 1, spread = smooth(0.12, 1, v); return { x: gx * (620 + v * 360) + sg * spread * 330, y: 280 - v * 180, z: v * 1700 }; }  // começa junto (perto) e se abre em dois (longe)
       case 'funnel': { var k = Math.pow(v, 1.12), ang = u * Math.PI * 2 + v * 3.0, rad = (1 - k) * 560; return { x: Math.cos(ang) * rad, y: Math.sin(ang) * rad * 0.55 + 30, z: 220 + k * 1500 }; }  // vórtice: tudo gira e converge pro mesmo ponto (concentração)
       case 'journey': { var s = lin; return { x: Math.sin(s * Math.PI * 3) * 400, y: (s - .5) * 940, z: 300 + Math.cos(s * Math.PI * 3) * 110 }; }
       case 'hexagon': { var s6 = Math.floor(lin * 6) % 6, f = (lin * 6) % 1, R = 205, a0 = (Math.PI / 3) * s6 - Math.PI / 2, a1 = (Math.PI / 3) * (s6 + 1) - Math.PI / 2, jz = (h1(i) - .5) * 14; return { x: lerp(Math.cos(a0) * R, Math.cos(a1) * R, f), y: lerp(Math.sin(a0) * R, Math.sin(a1) * R, f) + 30, z: 260 + jz }; }
@@ -92,12 +92,12 @@
 
   function drawGridWire(alpha, gold, splitMid) {
     if (alpha < 0.012) return;
-    var mid = Math.floor((COLS - 1) * 0.5);   // na bifurcação, não liga os dois lados no meio
+    var mid = Math.floor((COLS - 1) * 0.5), splitRow = (ROWS * 0.34) | 0;   // separa os dois caminhos só no fundo; perto ficam unidos
     ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(' + gold + ',' + alpha.toFixed(3) + ')';
     ctx.beginPath();
     for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
       var idx = r * COLS + c, pa = pts[idx];
-      if (c < COLS - 1 && !(splitMid && c === mid)) { var pr = pts[idx + 1]; ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pr.sx, pr.sy); }
+      if (c < COLS - 1 && !(splitMid && c === mid && r > splitRow)) { var pr = pts[idx + 1]; ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pr.sx, pr.sy); }
       if (r < ROWS - 1) { var pd = pts[idx + COLS]; ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pd.sx, pd.sy); }
     }
     ctx.stroke();
@@ -122,6 +122,9 @@
 
     var cx = W / 2, cy = lerp(cyOf(modeA), cyOf(modeB), morphT);
     var camX = reduced ? 0 : Math.sin(t * 0.22) * 12;
+    // ao sair da bifurcação, a câmera segue o caminho da DIREITA (o escolhido) e volta ao centro
+    var floatBeat = A + st.beatP, panX = 0;
+    if (floatBeat > 3.5 && floatBeat < 4.0) panX = Math.sin((floatBeat - 3.5) * 2 * Math.PI) * W * 0.17;   // desliza pro caminho da direita e volta quando o vórtice entra
     // quanto do estado atual é "universo" (controla tamanho/brilho, suave)
     var cloudMix = lerp(isCloudMode(A) ? 1 : 0, isCloudMode(B) ? 1 : 0, morphT);
     if (A === 1 && introT < 1) cloudMix = Math.max(cloudMix, smooth(0, 1, introT) * 0.6 + 0.4);
@@ -137,7 +140,7 @@
       p.x = lerp(p.x, tx, k); p.y = lerp(p.y, ty + drift, k); p.z = lerp(p.z, tz, k);
       var zz = Math.max(60, p.z + 520), s = FOCAL / zz;
       var par = desktop ? s * 90 * cloudMix : 0;   // ímã de mouse só no universo (hero); não entorta as formas
-      p.sx = cx + camX + p.x * s + mx * par * (1 + p.star);
+      p.sx = cx + camX - panX + p.x * s + mx * par * (1 + p.star);
       p.sy = cy + p.y * s + my * par * (1 + p.star);
       p.sc = s;
     }
