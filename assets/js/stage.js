@@ -72,8 +72,8 @@
       case 'journey': { var s = lin; return { x: Math.sin(s * Math.PI * 3) * 400, y: (s - .5) * 940, z: 300 + Math.cos(s * Math.PI * 3) * 110 }; }
       case 'hexagon': { var s6 = Math.floor(lin * 6) % 6, f = (lin * 6) % 1, R = desktop ? 205 : 150, a0 = (Math.PI / 3) * s6 - Math.PI / 2, a1 = (Math.PI / 3) * (s6 + 1) - Math.PI / 2, jz = (h1(i) - .5) * 14; return { x: lerp(Math.cos(a0) * R, Math.cos(a1) * R, f), y: lerp(Math.sin(a0) * R, Math.sin(a1) * R, f) + 30, z: 260 + jz }; }
       case 'isonet': return { x: (u - .5) * 1100, y: (v - .5) * 640 + 20, z: 320 };
-      case 'corridor': return { x: (u - .5) * 1200, y: 240, z: 30 + v * 2800 };            // estrada em 1ª pessoa: perto largo (embaixo, passando da tela), foge pro ponto de fuga
-      case 'rails': return { x: (u - .5) * 780, y: (v - .5) * 1000, z: 300 };               // a estrada sobe e vira linhas retas verticais, de frente
+      case 'rroad': { var lane = (u - 0.75) * 2; return { x: lane * 470, y: 240, z: 30 + v * 2600 }; }  // SÓ o caminho da DIREITA, centralizado, seguindo reto pro ponto de fuga
+      case 'flyaway': return { x: (u - .5) * 700 - 1000, y: 320 + v * 240, z: 260 };                     // o caminho da ESQUERDA sai de cena (desce e some pra esquerda)
       default: return { x: (h1(i) - .5) * 1700, y: (h2(i) - .5) * 1000, z: 120 + h1(i + 7) * 1900 };
     }
   }
@@ -104,6 +104,17 @@
     }
     ctx.stroke();
   }
+  function drawGridWireRange(alpha, gold, c0, c1) {   // só as colunas [c0,c1) — separa caminho esquerdo/direito com alphas próprios
+    if (alpha < 0.012) return;
+    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(' + gold + ',' + alpha.toFixed(3) + ')';
+    ctx.beginPath();
+    for (var r = 0; r < ROWS; r++) for (var c = c0; c < c1; c++) {
+      var idx = r * COLS + c, pa = pts[idx];
+      if (c < c1 - 1) { var pr = pts[idx + 1]; ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pr.sx, pr.sy); }
+      if (r < ROWS - 1) { var pd = pts[idx + COLS]; ctx.moveTo(pa.sx, pa.sy); ctx.lineTo(pd.sx, pd.sy); }
+    }
+    ctx.stroke();
+  }
   function drawSeqWire(alpha, gold) {
     if (alpha < 0.012) return;
     ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(' + gold + ',' + alpha.toFixed(3) + ')';
@@ -130,15 +141,14 @@
     // TRANSIÇÃO BEAT 3 → 4 (primeira pessoa, descendo o caminho da DIREITA):
     // fork (dois caminhos no chão) → corridor (mergulha no caminho direito, reto, fugindo pro horizonte)
     // → rails (o caminho sobe e vira linhas retas de frente) → funnel (as linhas são sugadas: concentração).
-    var t34 = (A === 3), dive = 0, stand = 0, vort = 0;
+    var t34 = (A === 3), dive = 0, vort = 0, leftAlpha = 1, mid = COLS >> 1;
     if (t34) {
-      dive  = smooth(3.28, 3.56, floatBeat);   // fork → estrada: os dois caminhos viram uma estrada só, mergulhando em 1ª pessoa
-      stand = smooth(3.54, 3.74, floatBeat);   // a estrada sobe e vira linhas retas verticais, de frente
-      vort  = smooth(3.82, 4.00, floatBeat);   // as linhas são sugadas pro vórtice (3.74–3.82 = só as linhas, sem texto)
-      var zin = smooth(3.05, 3.42, floatBeat), zout = smooth(3.74, 4.00, floatBeat);
-      zoom = 1 + 0.95 * zin - 0.95 * zout;     // empurra pra dentro no mergulho, segura, recua ao virar vórtice
-      focusX = W * 0.16 * smooth(3.05, 3.28, floatBeat) * (1 - smooth(3.28, 3.55, floatBeat));  // olha pro caminho da direita e centra
-      cy = lerp(0.40, 0.52, smooth(3.10, 3.70, floatBeat)) * H;
+      dive = smooth(3.24, 3.54, floatBeat);    // foca a DIREITA: o caminho direito centraliza e segue reto; o esquerdo sai de cena
+      vort = smooth(3.80, 4.00, floatBeat);    // o caminho reto floresce no círculo (vórtice do beat 4)
+      leftAlpha = clamp(Math.max(1 - smooth(3.24, 3.52, floatBeat), smooth(3.82, 4.00, floatBeat)), 0, 1);  // esquerda some no commit e só volta pra fechar o círculo (continuidade com o beat 4)
+      var zin = smooth(3.04, 3.40, floatBeat), zout = smooth(3.68, 4.00, floatBeat);
+      zoom = 1 + 0.9 * zin - 0.9 * zout;       // zoom entrando no caminho direito; recua ao virar círculo
+      cy = lerp(0.40, 0.52, smooth(3.10, 3.66, floatBeat)) * H;
     }
     // quanto do estado atual é "universo" (controla tamanho/brilho, suave)
     var cloudMix = lerp(isCloudMode(A) ? 1 : 0, isCloudMode(B) ? 1 : 0, morphT);
@@ -150,11 +160,12 @@
       var p = pts[i];
       var a = beatShape(A, i), b = shape(modeB, i);
       var tx, ty, tz;
-      if (t34) {   // fork → corridor → rails → funnel, encadeado pelo scroll
-        var cor = shape('corridor', i), rail = shape('rails', i);
-        var s1x = lerp(a.x, cor.x, dive), s1y = lerp(a.y, cor.y, dive), s1z = lerp(a.z, cor.z, dive);
-        var s2x = lerp(s1x, rail.x, stand), s2y = lerp(s1y, rail.y, stand), s2z = lerp(s1z, rail.z, stand);
-        tx = lerp(s2x, b.x, vort); ty = lerp(s2y, b.y, vort); tz = lerp(s2z, b.z, vort);
+      if (t34) {   // direita → caminho central reto → círculo; esquerda sai de cena e volta pra fechar o círculo
+        var isR = (i % COLS) >= mid;
+        var inter = isR ? shape('rroad', i) : shape('flyaway', i);
+        var mFun = isR ? vort : smooth(3.64, 3.84, floatBeat);   // esquerda já volta pro vórtice enquanto está invisível (evita varredura lateral)
+        var m1x = lerp(a.x, inter.x, dive), m1y = lerp(a.y, inter.y, dive), m1z = lerp(a.z, inter.z, dive);
+        tx = lerp(m1x, b.x, mFun); ty = lerp(m1y, b.y, mFun); tz = lerp(m1z, b.z, mFun);
       } else {
         tx = lerp(a.x, b.x, morphT); ty = lerp(a.y, b.y, morphT); tz = lerp(a.z, b.z, morphT);
       }
@@ -173,8 +184,12 @@
     // cross-fade das linhas: grade e sequencial coexistem durante a transição
     var gridAlpha = ((GRID_WIRE[modeA] ? 1 - morphT : 0) + (GRID_WIRE[modeB] ? morphT : 0)) * wireBase;
     var seqAlpha = ((SEQ_WIRE[modeA] ? 1 - morphT : 0) + (SEQ_WIRE[modeB] ? morphT : 0)) * (wireBase + 0.05);
-    var splitMid = t34 ? (dive < 0.7 ? 1 : 0) : ((modeA === 'fork' || modeB === 'fork') ? 1 : 0);   // ao commitar no caminho direito, os dois viram um
-    drawGridWire(gridAlpha, gold, splitMid);
+    if (t34) {   // caminho direito sempre visível; esquerdo some no commit e volta pra fechar o círculo
+      drawGridWireRange(gridAlpha, gold, mid, COLS);
+      drawGridWireRange(gridAlpha * leftAlpha, gold, 0, mid);
+    } else {
+      drawGridWire(gridAlpha, gold, (modeA === 'fork' || modeB === 'fork') ? 1 : 0);
+    }
     drawSeqWire(seqAlpha, gold);
 
     var dotBase = lerp(0.85, 0.76, themeMix);
@@ -182,7 +197,7 @@
       var q = pts[m];
       var depth = clamp(q.sc * 1.05, .22, 1);                 // piso: nenhum ponto some
       var twk = cloudMix > 0.05 && !reduced ? (1 - cloudMix * 0.18 * (0.5 + 0.5 * Math.sin(t * 1.4 + q.tw))) : 1;
-      var alpha = clamp(dotBase * depth * twk, 0.08, 1);
+      var alpha = (t34 && (m % COLS) < mid) ? clamp(dotBase * depth * twk * leftAlpha, 0, 1) : clamp(dotBase * depth * twk, 0.08, 1);  // esquerda pode chegar a 0 (sai de cena)
       ctx.fillStyle = 'rgba(' + gold + ',' + alpha.toFixed(3) + ')';
       var sz = clamp(q.sc * (1.7 + cloudMix * q.star * 1.7), .7, 3.2);  // variação suave, sem inflar
       ctx.fillRect(q.sx - sz / 2, q.sy - sz / 2, sz, sz);

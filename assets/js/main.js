@@ -55,7 +55,7 @@
     if (beat3) {
       var inner3 = beat3.querySelector('.beat__inner');
       if (inner3) {
-        if (state.beat === 3) inner3.style.opacity = clamp(1 - (activeP - 0.28) / 0.20, 0, 1).toFixed(3);
+        if (state.beat === 3) inner3.style.opacity = clamp(1 - (activeP - 0.24) / 0.18, 0, 1).toFixed(3);
         else if (inner3.style.opacity !== '') inner3.style.opacity = '';
       }
     }
