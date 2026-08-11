@@ -124,11 +124,10 @@
     var camX = reduced ? 0 : Math.sin(t * 0.22) * 12;
     // ao sair da bifurcação, a câmera segue o caminho da DIREITA (o escolhido) e volta ao centro
     var floatBeat = A + st.beatP, focusX = 0, zoom = 1;
-    if (floatBeat > 3.5 && floatBeat < 4.4) {   // ZOOM: mergulha no caminho da DIREITA (ainda bifurcado); o vórtice emerge dele, já centrado
-      var pp = floatBeat < 4.0 ? (floatBeat - 3.5) / 0.5 : 1 - (floatBeat - 4.0) / 0.4;
-      var e = smooth(0, 1, clamp(pp, 0, 1));
-      zoom = 1 + e * 0.9;
-      focusX = e * W * 0.24 * (1 - morphT);
+    if (floatBeat > 3.0 && floatBeat < 4.0) {   // percorre uma via LONGA pelo caminho da DIREITA; toda a viagem termina ANTES do beat 4 (não o quebra)
+      var travel = smooth(3.05, 3.98, floatBeat);
+      focusX = travel * W * 0.3 * (1 - morphT);       // segue o caminho direito; volta ao centro quando vira vórtice
+      zoom = 1 + Math.sin(travel * Math.PI) * 0.7;    // avança e volta; em 4.0 zoom=1 e o vórtice já está centrado
     }
     // quanto do estado atual é "universo" (controla tamanho/brilho, suave)
     var cloudMix = lerp(isCloudMode(A) ? 1 : 0, isCloudMode(B) ? 1 : 0, morphT);

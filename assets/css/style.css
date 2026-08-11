@@ -441,6 +441,8 @@ h1, h2, h3, .statement, .voice, .fork__k, .not, .payoff,
 
 /* beats 2 e 3 — conteúdo no topo pra liberar a malha/bifurcação embaixo */
 .beat--upper .beat__inner { align-items: start; padding-top: clamp(112px, 15vh, 200px); }
+/* beat 3 mais longo: dá scroll pra percorrer a via pelo caminho direito antes do vórtice */
+.beat[data-beat="3"] { min-height: 300vh; }
 .beat--upper .lead--mid { margin-top: clamp(120px, 22vh, 260px); }
 
 /* beat 8 — título à esquerda, pessoa à direita (desktop) */
