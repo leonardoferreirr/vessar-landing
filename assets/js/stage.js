@@ -123,8 +123,13 @@
     var cx = W / 2, cy = lerp(cyOf(modeA), cyOf(modeB), morphT);
     var camX = reduced ? 0 : Math.sin(t * 0.22) * 12;
     // ao sair da bifurcação, a câmera segue o caminho da DIREITA (o escolhido) e volta ao centro
-    var floatBeat = A + st.beatP, panX = 0;
-    if (floatBeat > 3.5 && floatBeat < 4.0) panX = Math.sin((floatBeat - 3.5) * 2 * Math.PI) * W * 0.17;   // desliza pro caminho da direita e volta quando o vórtice entra
+    var floatBeat = A + st.beatP, focusX = 0, zoom = 1;
+    if (floatBeat > 3.5 && floatBeat < 4.4) {   // ZOOM: mergulha no caminho da DIREITA (ainda bifurcado); o vórtice emerge dele, já centrado
+      var pp = floatBeat < 4.0 ? (floatBeat - 3.5) / 0.5 : 1 - (floatBeat - 4.0) / 0.4;
+      var e = smooth(0, 1, clamp(pp, 0, 1));
+      zoom = 1 + e * 0.9;
+      focusX = e * W * 0.24 * (1 - morphT);
+    }
     // quanto do estado atual é "universo" (controla tamanho/brilho, suave)
     var cloudMix = lerp(isCloudMode(A) ? 1 : 0, isCloudMode(B) ? 1 : 0, morphT);
     if (A === 1 && introT < 1) cloudMix = Math.max(cloudMix, smooth(0, 1, introT) * 0.6 + 0.4);
@@ -138,9 +143,9 @@
       var drift = reduced ? 0 : Math.sin(t * 0.6 + p.tw) * cloudMix * 10;   // deriva só no universo; as malhas ficam retas
       var k = reduced ? 1 : 0.09;
       p.x = lerp(p.x, tx, k); p.y = lerp(p.y, ty + drift, k); p.z = lerp(p.z, tz, k);
-      var zz = Math.max(60, p.z + 520), s = FOCAL / zz;
+      var zz = Math.max(60, p.z + 520), s = FOCAL / zz * zoom;
       var par = desktop ? s * 90 * cloudMix : 0;   // ímã de mouse só no universo (hero); não entorta as formas
-      p.sx = cx + camX - panX + p.x * s + mx * par * (1 + p.star);
+      p.sx = cx + camX - focusX + p.x * s + mx * par * (1 + p.star);
       p.sy = cy + p.y * s + my * par * (1 + p.star);
       p.sc = s;
     }
