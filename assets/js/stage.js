@@ -70,8 +70,10 @@
       case 'fork': { var gx = u - 0.5, sg = gx < 0 ? -1 : 1, spread = smooth(0.12, 1, v); return { x: gx * (620 + v * 360) + sg * spread * 330, y: 280 - v * 180, z: v * 1700 }; }  // começa junto (perto) e se abre em dois (longe)
       case 'funnel': { var k = Math.pow(v, 1.12), ang = u * Math.PI * 2 + v * 3.0, rad = (1 - k) * 560; return { x: Math.cos(ang) * rad, y: Math.sin(ang) * rad * 0.55 + 30, z: 220 + k * 1500 }; }  // vórtice: tudo gira e converge pro mesmo ponto (concentração)
       case 'journey': { var s = lin; return { x: Math.sin(s * Math.PI * 3) * 400, y: (s - .5) * 940, z: 300 + Math.cos(s * Math.PI * 3) * 110 }; }
-      case 'hexagon': { var s6 = Math.floor(lin * 6) % 6, f = (lin * 6) % 1, R = 205, a0 = (Math.PI / 3) * s6 - Math.PI / 2, a1 = (Math.PI / 3) * (s6 + 1) - Math.PI / 2, jz = (h1(i) - .5) * 14; return { x: lerp(Math.cos(a0) * R, Math.cos(a1) * R, f), y: lerp(Math.sin(a0) * R, Math.sin(a1) * R, f) + 30, z: 260 + jz }; }
+      case 'hexagon': { var s6 = Math.floor(lin * 6) % 6, f = (lin * 6) % 1, R = desktop ? 205 : 150, a0 = (Math.PI / 3) * s6 - Math.PI / 2, a1 = (Math.PI / 3) * (s6 + 1) - Math.PI / 2, jz = (h1(i) - .5) * 14; return { x: lerp(Math.cos(a0) * R, Math.cos(a1) * R, f), y: lerp(Math.sin(a0) * R, Math.sin(a1) * R, f) + 30, z: 260 + jz }; }
       case 'isonet': return { x: (u - .5) * 1100, y: (v - .5) * 640 + 20, z: 320 };
+      case 'corridor': return { x: (u - .5) * 1200, y: 240, z: 30 + v * 2800 };            // estrada em 1ª pessoa: perto largo (embaixo, passando da tela), foge pro ponto de fuga
+      case 'rails': return { x: (u - .5) * 780, y: (v - .5) * 1000, z: 300 };               // a estrada sobe e vira linhas retas verticais, de frente
       default: return { x: (h1(i) - .5) * 1700, y: (h2(i) - .5) * 1000, z: 120 + h1(i + 7) * 1900 };
     }
   }
@@ -85,7 +87,7 @@
   }
 
   var MODES = { 1: 'cloud', 2: 'curve', 3: 'fork', 4: 'funnel', 5: 'journey', 6: 'hexagon', 7: 'isonet', 8: 'cloud', 9: 'floor', 10: 'cloud', 11: 'cloud' };
-  var GRID_WIRE = { floor: 1, curve: 1, fork: 1, funnel: 1, isonet: 1 };
+  var GRID_WIRE = { floor: 1, curve: 1, fork: 1, funnel: 1, isonet: 1, corridor: 1, rails: 1 };
   var SEQ_WIRE = { hexagon: 1, journey: 1 };
   function cyOf(m) { return H * (m === 'floor' || m === 'fork' || m === 'curve' ? 0.40 : m === 'hexagon' ? 0.63 : 0.52); }
   function isCloudMode(beat) { return (MODES[beat] || 'cloud') === 'cloud'; }
@@ -120,14 +122,23 @@
     var morphT = smooth(0.55, 1.0, st.beatP);           // estável e legível a maior parte; só transiciona na saída (sem spoiler)
     themeMix = lerp(themeMix, st.theme === 'light' ? 1 : 0, 0.07);
 
+    var floatBeat = A + st.beatP;
     var cx = W / 2, cy = lerp(cyOf(modeA), cyOf(modeB), morphT);
     var camX = reduced ? 0 : Math.sin(t * 0.22) * 12;
-    // ao sair da bifurcação, a câmera segue o caminho da DIREITA (o escolhido) e volta ao centro
-    var floatBeat = A + st.beatP, focusX = 0, zoom = 1;
-    if (floatBeat > 3.0 && floatBeat < 4.0) {   // percorre uma via LONGA pelo caminho da DIREITA; toda a viagem termina ANTES do beat 4 (não o quebra)
-      var travel = smooth(3.05, 3.98, floatBeat);
-      focusX = travel * W * 0.3 * (1 - morphT);       // segue o caminho direito; volta ao centro quando vira vórtice
-      zoom = 1 + Math.sin(travel * Math.PI) * 0.7;    // avança e volta; em 4.0 zoom=1 e o vórtice já está centrado
+    var focusX = 0, zoom = 1;
+
+    // TRANSIÇÃO BEAT 3 → 4 (primeira pessoa, descendo o caminho da DIREITA):
+    // fork (dois caminhos no chão) → corridor (mergulha no caminho direito, reto, fugindo pro horizonte)
+    // → rails (o caminho sobe e vira linhas retas de frente) → funnel (as linhas são sugadas: concentração).
+    var t34 = (A === 3), dive = 0, stand = 0, vort = 0;
+    if (t34) {
+      dive  = smooth(3.28, 3.56, floatBeat);   // fork → estrada: os dois caminhos viram uma estrada só, mergulhando em 1ª pessoa
+      stand = smooth(3.54, 3.74, floatBeat);   // a estrada sobe e vira linhas retas verticais, de frente
+      vort  = smooth(3.82, 4.00, floatBeat);   // as linhas são sugadas pro vórtice (3.74–3.82 = só as linhas, sem texto)
+      var zin = smooth(3.05, 3.42, floatBeat), zout = smooth(3.74, 4.00, floatBeat);
+      zoom = 1 + 0.95 * zin - 0.95 * zout;     // empurra pra dentro no mergulho, segura, recua ao virar vórtice
+      focusX = W * 0.16 * smooth(3.05, 3.28, floatBeat) * (1 - smooth(3.28, 3.55, floatBeat));  // olha pro caminho da direita e centra
+      cy = lerp(0.40, 0.52, smooth(3.10, 3.70, floatBeat)) * H;
     }
     // quanto do estado atual é "universo" (controla tamanho/brilho, suave)
     var cloudMix = lerp(isCloudMode(A) ? 1 : 0, isCloudMode(B) ? 1 : 0, morphT);
@@ -138,7 +149,15 @@
     for (var i = 0; i < N; i++) {
       var p = pts[i];
       var a = beatShape(A, i), b = shape(modeB, i);
-      var tx = lerp(a.x, b.x, morphT), ty = lerp(a.y, b.y, morphT), tz = lerp(a.z, b.z, morphT);
+      var tx, ty, tz;
+      if (t34) {   // fork → corridor → rails → funnel, encadeado pelo scroll
+        var cor = shape('corridor', i), rail = shape('rails', i);
+        var s1x = lerp(a.x, cor.x, dive), s1y = lerp(a.y, cor.y, dive), s1z = lerp(a.z, cor.z, dive);
+        var s2x = lerp(s1x, rail.x, stand), s2y = lerp(s1y, rail.y, stand), s2z = lerp(s1z, rail.z, stand);
+        tx = lerp(s2x, b.x, vort); ty = lerp(s2y, b.y, vort); tz = lerp(s2z, b.z, vort);
+      } else {
+        tx = lerp(a.x, b.x, morphT); ty = lerp(a.y, b.y, morphT); tz = lerp(a.z, b.z, morphT);
+      }
       var drift = reduced ? 0 : Math.sin(t * 0.6 + p.tw) * cloudMix * 10;   // deriva só no universo; as malhas ficam retas
       var k = reduced ? 1 : 0.09;
       p.x = lerp(p.x, tx, k); p.y = lerp(p.y, ty + drift, k); p.z = lerp(p.z, tz, k);
@@ -154,7 +173,8 @@
     // cross-fade das linhas: grade e sequencial coexistem durante a transição
     var gridAlpha = ((GRID_WIRE[modeA] ? 1 - morphT : 0) + (GRID_WIRE[modeB] ? morphT : 0)) * wireBase;
     var seqAlpha = ((SEQ_WIRE[modeA] ? 1 - morphT : 0) + (SEQ_WIRE[modeB] ? morphT : 0)) * (wireBase + 0.05);
-    drawGridWire(gridAlpha, gold, (modeA === 'fork' || modeB === 'fork') ? 1 : 0);
+    var splitMid = t34 ? (dive < 0.7 ? 1 : 0) : ((modeA === 'fork' || modeB === 'fork') ? 1 : 0);   // ao commitar no caminho direito, os dois viram um
+    drawGridWire(gridAlpha, gold, splitMid);
     drawSeqWire(seqAlpha, gold);
 
     var dotBase = lerp(0.85, 0.76, themeMix);
@@ -173,7 +193,7 @@
   window.VessarStage = {
     update: function (s) { st.beat = s.beat; st.beatP = s.beatP; st.theme = s.theme; },
     hexVertices: function () {
-      var cx = W / 2, cy = H * 0.60, R = 240, out = [], s = FOCAL / (260 + 520);
+      var cx = W / 2, cy = H * 0.60, R = desktop ? 240 : 170, out = [], s = FOCAL / (260 + 520);
       for (var k = 0; k < 6; k++) { var a = (Math.PI / 3) * k - Math.PI / 2; out.push({ x: cx + Math.cos(a) * R * s + mx * s * 90, y: cy + (Math.sin(a) * R + 40) * s + my * s * 90 }); }
       return out;
     }

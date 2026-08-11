@@ -50,17 +50,31 @@
     state.theme = theme;
     if (window.VessarStage) window.VessarStage.update(state);
 
+    // beat 3: o texto dos dois caminhos some durante o mergulho — sobra "só o caminho" antes do vórtice
+    var beat3 = beats[2];
+    if (beat3) {
+      var inner3 = beat3.querySelector('.beat__inner');
+      if (inner3) {
+        if (state.beat === 3) inner3.style.opacity = clamp(1 - (activeP - 0.28) / 0.20, 0, 1).toFixed(3);
+        else if (inner3.style.opacity !== '') inner3.style.opacity = '';
+      }
+    }
+
     // rótulos das 6 dimensões acompanham os vértices do hexágono (beat 6)
     if (hexLabels) {
       if (state.beat === 6 && window.VessarStage && window.VessarStage.hexVertices) {
         hexLabels.classList.add('show');
         var vs = window.VessarStage.hexVertices();
         var hcx = window.innerWidth / 2, hcy = vh * 0.63;
+        var mob = window.innerWidth < 720, pushX = mob ? 14 : 30, pushY = mob ? 12 : 24, pad = 8;
         for (var li = 0; li < hexlabs.length; li++) {
           var vtx = vs[li]; if (!vtx) continue;
           var dx = vtx.x - hcx, dy = vtx.y - hcy, len = Math.sqrt(dx * dx + dy * dy) || 1;
-          hexlabs[li].style.left = (vtx.x + dx / len * 30) + 'px';
-          hexlabs[li].style.top = (vtx.y + dy / len * 24) + 'px';
+          var lx = vtx.x + dx / len * pushX, ly = vtx.y + dy / len * pushY;
+          var half = hexlabs[li].offsetWidth / 2 + pad;   // nunca deixa o rótulo sair da tela
+          lx = clamp(lx, half, window.innerWidth - half);
+          hexlabs[li].style.left = lx + 'px';
+          hexlabs[li].style.top = ly + 'px';
         }
       } else if (hexLabels.classList.contains('show')) {
         hexLabels.classList.remove('show');
