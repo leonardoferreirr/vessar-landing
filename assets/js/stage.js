@@ -86,9 +86,17 @@
     return shape(MODES[beat] || 'cloud', i);
   }
 
-  /* 9 beats desde a saida das secoes de diretor responsavel e de lastro:
-     o convite virou 8 e o formulario virou 9 */
-  var MODES = { 1: 'cloud', 2: 'curve', 3: 'fork', 4: 'funnel', 5: 'journey', 6: 'hexagon', 7: 'isonet', 8: 'cloud', 9: 'cloud' };
+  /* 11 beats. Entraram o respiro de impacto (6) e o como funciona (9), entao
+     tudo a partir do antigo 6 andou uma casa: hexagono virou 7, isonet 8,
+     convite 10 e formulario 11. A coreografia fork -> vortice (os limiares de
+     floatBeat entre 3.2 e 4.0, mais abaixo) fica intacta porque nada foi
+     inserido antes do beat 4. Mexeu na quantidade de beats aqui? Confira o
+     clamp de B e o numero do hexagono em main.js. */
+  var MODES = {
+    1: 'cloud', 2: 'curve', 3: 'fork', 4: 'funnel', 5: 'journey', 6: 'journey',
+    7: 'hexagon', 8: 'isonet', 9: 'isonet', 10: 'cloud', 11: 'cloud'
+  };
+  var ULTIMO_BEAT = 11;
   var GRID_WIRE = { floor: 1, curve: 1, fork: 1, funnel: 1, isonet: 1, corridor: 1, rails: 1 };
   var SEQ_WIRE = { hexagon: 1, journey: 1 };
   function cyOf(m) { return H * (m === 'floor' || m === 'fork' || m === 'curve' ? 0.40 : m === 'hexagon' ? 0.63 : 0.52); }
@@ -130,7 +138,7 @@
     if (st.beat === 1 && introT < 1 && (reduced || t > 1.0)) introT += reduced ? 1 : 0.0075;  // segura o V um instante, depois dispersa
     mx = lerp(mx, tmx, 0.05); my = lerp(my, tmy, 0.05);
 
-    var A = st.beat, B = Math.min(9, st.beat + 1);
+    var A = st.beat, B = Math.min(ULTIMO_BEAT, st.beat + 1);
     var modeA = MODES[A] || 'cloud', modeB = MODES[B] || 'cloud';
     var morphT = smooth(0.55, 1.0, st.beatP);           // estável e legível a maior parte; só transiciona na saída (sem spoiler)
     themeMix = lerp(themeMix, st.theme === 'light' ? 1 : 0, 0.07);

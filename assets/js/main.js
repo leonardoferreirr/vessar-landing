@@ -11,6 +11,8 @@
   var scrollHint = document.getElementById('scrollHint');
   var hexLabels = document.getElementById('hexLabels');
   var hexlabs = hexLabels ? Array.prototype.slice.call(hexLabels.querySelectorAll('.hexlab')) : [];
+  var secaoHex = document.querySelector('.beat--hex');
+  var BEAT_HEX = secaoHex ? +secaoHex.getAttribute('data-beat') : 7;
 
   var vh = window.innerHeight;
   var docH = 1;
@@ -72,9 +74,11 @@
       }
     }
 
-    // rótulos das 6 dimensões acompanham os vértices do hexágono (beat 6)
+    // rótulos das 6 dimensões acompanham os vértices do hexágono. O número do
+    // beat sai do próprio DOM: já foi 6, virou 7 quando entrou o respiro de
+    // impacto, e inserir seção não pode mais deixar os rótulos órfãos.
     if (hexLabels) {
-      if (state.beat === 6 && window.VessarStage && window.VessarStage.hexVertices) {
+      if (state.beat === BEAT_HEX && window.VessarStage && window.VessarStage.hexVertices) {
         hexLabels.classList.add('show');
         var vs = window.VessarStage.hexVertices();
         var hcx = window.innerWidth / 2, hcy = vh * 0.63;
