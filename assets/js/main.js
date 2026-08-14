@@ -17,6 +17,13 @@
   var state = { globalP: 0, beat: 1, beatP: 0, theme: 'dark' };
   var ticking = false;
 
+  /* O texto acompanha o dedo. O .beat__inner e sticky, entao sem isso a
+     mensagem aparece e congela ate a animacao do palco terminar. Aqui a caixa
+     desliza de forma continua ao longo de todo o beat: comeca um pouco abaixo
+     do centro e termina um pouco acima, no ritmo do scroll. */
+  var caixas = beats.map(function (b) { return b.querySelector('.beat__box'); });
+  var DESLIZE = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 92;
+
   function measure() {
     vh = window.innerHeight;
     docH = document.documentElement.scrollHeight - vh;
@@ -38,6 +45,11 @@
       if (b.classList.contains('is-active') !== isActive) b.classList.toggle('is-active', isActive);
       if (b.classList.contains('is-past') !== isPast) b.classList.toggle('is-past', isPast);
       if (isActive) { active = i; activeP = p; }
+
+      // so os beats por perto: mexer nos de fora custa layout a toa
+      if (DESLIZE && caixas[i] && y > top - vh * 1.2 && y < top + h + vh * 0.2) {
+        caixas[i].style.transform = 'translate3d(0,' + ((0.5 - p) * DESLIZE).toFixed(1) + 'px,0)';
+      }
     }
 
     var theme = beats[active] ? beats[active].getAttribute('data-theme') : 'dark';
@@ -66,7 +78,7 @@
         hexLabels.classList.add('show');
         var vs = window.VessarStage.hexVertices();
         var hcx = window.innerWidth / 2, hcy = vh * 0.63;
-        var mob = window.innerWidth < 720, pushX = mob ? 14 : 30, pushY = mob ? 12 : 24, pad = 8;
+        var mob = window.innerWidth < 720, pushX = mob ? 24 : 30, pushY = mob ? 16 : 24, pad = 10;
         for (var li = 0; li < hexlabs.length; li++) {
           var vtx = vs[li]; if (!vtx) continue;
           var dx = vtx.x - hcx, dy = vtx.y - hcy, len = Math.sqrt(dx * dx + dy * dy) || 1;
