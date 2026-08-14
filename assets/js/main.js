@@ -78,12 +78,18 @@
         hexLabels.classList.add('show');
         var vs = window.VessarStage.hexVertices();
         var hcx = window.innerWidth / 2, hcy = vh * 0.63;
-        var mob = window.innerWidth < 720, pushX = mob ? 24 : 30, pushY = mob ? 16 : 24, pad = 10;
+        var mob = window.innerWidth < 720, folgaX = mob ? 12 : 20, folgaY = mob ? 10 : 16, pad = 10;
         for (var li = 0; li < hexlabs.length; li++) {
           var vtx = vs[li]; if (!vtx) continue;
           var dx = vtx.x - hcx, dy = vtx.y - hcy, len = Math.sqrt(dx * dx + dy * dy) || 1;
-          var lx = vtx.x + dx / len * pushX, ly = vtx.y + dy / len * pushY;
-          var half = hexlabs[li].offsetWidth / 2 + pad;   // nunca deixa o rótulo sair da tela
+          var ux = dx / len, uy = dy / len;
+          // o rótulo é centrado no ponto, então empurrar um valor fixo deixava
+          // metade da caixa por cima da linha do hexágono: o empurrão tem que
+          // contar o tamanho do próprio rótulo na direção em que ele sai.
+          var w2 = hexlabs[li].offsetWidth / 2, h2 = hexlabs[li].offsetHeight / 2;
+          var lx = vtx.x + ux * (Math.abs(ux) * w2 + folgaX);
+          var ly = vtx.y + uy * (Math.abs(uy) * h2 + folgaY);
+          var half = w2 + pad;                            // nunca deixa o rótulo sair da tela
           lx = clamp(lx, half, window.innerWidth - half);
           hexlabs[li].style.left = lx + 'px';
           hexlabs[li].style.top = ly + 'px';
