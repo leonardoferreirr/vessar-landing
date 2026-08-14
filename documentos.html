@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documentos · Vessar Consultoria de Valores Mobiliários</title>
+  <meta name="description" content="Formulário de referência, código de ética, manual de regras e política de investimentos da Vessar Consultoria de Investimentos, conforme a regulamentação da CVM.">
+  <meta name="theme-color" content="#080b10">
+  <link rel="icon" href="assets/img/vessar-mark.svg" type="image/svg+xml">
+  <link rel="mask-icon" href="assets/img/vessar-mark.svg" color="#e2be75">
+  <link rel="preload" href="assets/fonts/Cinzel-var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Montserrat-var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    /* pagina estatica: sem palco, sem filme de scroll */
+    body.docs { background: var(--bg, #080b10); min-height: 100vh; }
+    .docs__wrap { max-width: 860px; margin-inline: auto; padding: clamp(28px,6vw,64px) clamp(20px,5vw,40px) 80px; }
+    .docs__topo { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: clamp(40px,8vw,72px); }
+    .docs__voltar { font-size: 13px; letter-spacing: .06em; color: var(--fg-dim); transition: color .3s; }
+    .docs__voltar:hover { color: var(--gold); }
+    .docs h1 { font-family: var(--display); font-weight: 500; font-size: clamp(2rem,5vw,3rem); line-height: 1.1; margin-bottom: 16px; }
+    .docs__lead { color: var(--fg-dim); max-width: 56ch; line-height: 1.65; margin-bottom: clamp(36px,7vw,56px); }
+    .doc { display: flex; align-items: center; gap: 20px; padding: 22px 0; border-top: 1px solid rgba(226,190,117,.16); }
+    .doc:last-of-type { border-bottom: 1px solid rgba(226,190,117,.16); }
+    .doc__txt { flex: 1; min-width: 0; }
+    .doc__nome { font-family: var(--display); font-size: 1.12rem; font-weight: 500; }
+    .doc__sub { font-size: .86rem; color: var(--fg-dim); margin-top: 5px; line-height: 1.5; }
+    .doc__acao { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; color: var(--gold); }
+    .doc__acao[data-vazio] { color: var(--fg-dim); opacity: .65; }
+    .docs__rodape { margin-top: clamp(40px,8vw,64px); padding-top: 28px; border-top: 1px solid rgba(226,190,117,.16); font-size: .84rem; color: var(--fg-dim); line-height: 1.7; }
+  </style>
+</head>
+<body class="docs">
+  <div class="docs__wrap">
+
+    <div class="docs__topo">
+      <a class="wordmark" href="index.html" aria-label="Vessar, início">
+        <img class="wordmark__v" src="assets/img/vessar-mark.svg" alt="" width="30" height="26">
+        <span class="wordmark__name">VESSAR</span>
+      </a>
+      <a class="docs__voltar" href="index.html">← Voltar ao site</a>
+    </div>
+
+    <h1>Documentos</h1>
+    <p class="docs__lead">
+      Documentos institucionais da Vessar Consultoria de Investimentos, mantidos à disposição
+      conforme a regulamentação da Comissão de Valores Mobiliários.
+    </p>
+
+    <!-- Para publicar: coloque o PDF em assets/docs/ e troque o href pelo arquivo,
+         removendo o atributo data-vazio do rótulo. -->
+    <div class="doc">
+      <div class="doc__txt">
+        <p class="doc__nome">Formulário de referência</p>
+        <p class="doc__sub">Informações cadastrais, societárias e operacionais da consultoria.</p>
+      </div>
+      <span class="doc__acao" data-vazio>Em breve</span>
+    </div>
+
+    <div class="doc">
+      <div class="doc__txt">
+        <p class="doc__nome">Código de ética</p>
+        <p class="doc__sub">Princípios de conduta aplicáveis aos sócios e colaboradores.</p>
+      </div>
+      <span class="doc__acao" data-vazio>Em breve</span>
+    </div>
+
+    <div class="doc">
+      <div class="doc__txt">
+        <p class="doc__nome">Manual de regras, procedimentos e controles internos</p>
+        <p class="doc__sub">Como a consultoria organiza controles, conflitos de interesse e segregação de atividades.</p>
+      </div>
+      <span class="doc__acao" data-vazio>Em breve</span>
+    </div>
+
+    <div class="doc">
+      <div class="doc__txt">
+        <p class="doc__nome">Política de investimentos</p>
+        <p class="doc__sub">Critérios que orientam as recomendações e a análise de adequação ao perfil.</p>
+      </div>
+      <span class="doc__acao" data-vazio>Em breve</span>
+    </div>
+
+    <div class="docs__rodape">
+      Vessar Consultoria de Investimentos · CNPJ 66.853.886/0001-24<br>
+      Consultoria de valores mobiliários · Ato Declaratório CVM nº 25.571<br>
+      Savassi, Belo Horizonte, MG · <a href="mailto:contato@vessar.com.br">contato@vessar.com.br</a> · (31) 3157-3952
+    </div>
+
+  </div>
+</body>
+</html>
